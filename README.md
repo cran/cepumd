@@ -1,0 +1,110 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- badges: start -->
+
+[![Codecov test
+coverage](https://codecov.io/gh/arcenis-r/cepumd/branch/master/graph/badge.svg)](https://app.codecov.io/gh/arcenis-r/cepumd?branch=master)
+
+[![CRAN
+status](https://www.r-pkg.org/badges/version/cepumd)](https://CRAN.R-project.org/package=cepumd)
+<!-- badges: end -->
+
+# cepumd <a href="https://arcenis-r.github.io/cepumd/"><img src="man/figures/logo.png" align="right" height="139" alt="cepumd website" /></a>
+
+The purpose of cepumd is to make working with Consumer Expenditure
+Surveys (CE) Public-Use Microdata (PUMD) easier toward calculating mean,
+weighted, annual expenditures (henceforth “mean expenditures”). The
+challenges cepumd seeks to address deal primarily with pulling together
+the necessary data toward this end. Some of the overarching ideas
+underlying the package are as follows:
+
+- Use a Tidyverse framework for most operations and be (hopefully)
+  generally Tidyverse friendly
+
+- Balance the effort to make the end user’s experience with CE PUMD
+  easier while being flexible enough to allow that user to perform any
+  analysis with the data they wish
+
+- Only designed to help users calculate mean expenditures on and of the
+  consumer unit (CU), i.e., not income, not assets, not liabilities, not
+  gifts.
+
+## Challenges addressed by `cepumd`
+
+`cepumd` seeks to address challenges in three categories: data
+gathering/organization; managing data inconsistencies; and calculating
+weighted, annual metrics.
+
+- **Data gathering/organization**
+  - Convert hierarchical grouping (HG) files to data tables using
+    `ce_hg()`
+  - Help the user identify the Universal Classification Codes (UCCs)
+    related to their analysis using a combination of `ce_hg()` and
+    `ce_uccs()`
+  - Combine all required files and variables using `ce_prepdata()`
+- **Managing data inconsistencies**
+  - Provide the ability to recode variable categories using the CE
+    Dictionary for Interview and Diary Surveys
+  - Resolve some inconsistencies such as differences code definitions
+    between the Interview and Diary (check the definitions of the
+    “FAM_TYPE” variable categories in 2015 for an example)
+  - Provide useful errors or warnings when there are multiple categories
+    of something the user is trying to access, e.g., some titles in the
+    hierarchical grouping files (“stub” or “HG” files) repeat and
+    requires more careful selection of UCCs
+- **Calculating weighted, annual metrics**
+  - Calculate a mean expenditure with `ce_mean()` or expenditure
+    quantile with `ce_quantile()`
+  - Account for the factor (annual vs. quarterly expenditure)
+  - Account for the “months in scope” of a given consumer unit (CU)
+  - Annualize expenditures for either Diary or Interview expenditures
+  - Integrate Interview and Diary data as necessary
+
+## Installation
+
+Install the production version with `install.packages("cepumd")`
+
+You can install the development version of `cepumd` from
+[GitHub](https://github.com), but you’ll first need the `devtools`
+package:
+
+``` r
+if (!"devtools" %in% installed.packages()[, "Package"]) {
+  install.packages("devtools", dependencies = TRUE)
+}
+
+devtools::install_github("arcenis-r/cepumd")
+```
+
+## Key cepumd functions
+
+- The workhorse of `cepumd` is `ce_prepdata()`. It merges the household
+  characteristics file (FMLI/-D) with the corresponding expenditure
+  tabulation file (MTBI/EXPD) for a specified year, adjusts weights for
+  months-in-scope and the number of collection quarters, adjusts some
+  cost values by their periodicity factor (some cost categories are
+  represented as annual figures and others as quarterly). With the
+  recent update it only requires the first 3 arguments to function: the
+  year, the survey type, and one or more valid UCCs. `ce_prepdata()` now
+  creates all of the other necessary objects within the function if not
+  provided.
+
+- There are two functions for wrangling hierarchical grouping data into
+  more usable formats:
+
+  - `ce_hg()` pulls the requested type of HG file (Interview, Diary, or
+    Integrated) for a specified year.
+  - `ce_uccs()` filters the HG file for the specified expenditure
+    category and returns either a data frame with only that section of
+    the HG file or the Universal Classification Codes (UCCs) that make
+    up that expenditure category.
+
+- There are two functions that the user can use to calculate CE summary
+  statistics:
+
+  - `ce_mean()` calculates a mean expenditure, standard error of the
+    mean, coefficient of variation, and an aggregate expenditure.
+  - `ce_quantiles()` calculates weighted expenditure quantiles. It is
+    important to note that calculating medians for integrated
+    expenditures is not recommended because the calculation involves
+    using weights from both the Diary and Survey instruments.
